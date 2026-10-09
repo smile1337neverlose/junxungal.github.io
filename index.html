@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>交大军训物语 · 女性视角文字版（本地图片）</title>
+    <style>
+        :root {
+            --bg-deep: #0d0f1c;
+            --bg-panel: #151a2e;
+            --bg-dialog: #1e2640;
+            --text-primary: #eae6f0;
+            --text-accent: #f5c76a;
+            --text-subtle: #b0a8c0;
+            --btn-bg: #252b48;
+            --btn-hover: #313a5c;
+            --btn-border: #4a5480;
+            --score-red: #ff7b7b;
+            --gold: #f5c76a;
+            --shadow: 0 20px 50px rgba(0,0,0,0.7);
+            --font-serif: 'Georgia', 'Times New Roman', '宋体', 'Noto Serif SC', serif;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            background: #0d0f1c;
+            font-family: var(--font-serif);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 18px;
+        }
+
+        #game-wrapper {
+            width: 100%;
+            max-width: 880px;
+            background: #151a2e;
+            border-radius: 28px;
+            padding: 28px 30px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.7);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            min-height: 400px;
+        }
+
+        #score-hud {
+            text-align: right;
+            font-size: 0.8rem;
+            letter-spacing: 2px;
+            color: rgba(255, 255, 255, 0.4);
+            margin-bottom: 14px;
+        }
+
+        #dynamic-content {
+            min-height: 350px;
+        }
+
+        #scene-title {
+            font-size: 1.7rem;
+            text-align: center;
+            font-weight: bold;
+            color: #f5c76a;
+            letter-spacing: 3px;
+            margin-bottom: 22px;
+            line-height: 1.4;
+        }
+
+        .image-container {
+            margin-bottom: 20px;
+            border-radius: 12px;
+            overflow: hidden;
+            background: #1e2640;
+            min-height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        .image-container img {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+        .image-fallback {
+            padding: 20px;
+            text-align: center;
+            color: #b0a8c0;
+            font-size: 0.85rem;
+            line-height: 1.8;
+        }
+
+        #narrative-box {
+            background: #1e2640;
+            border-left: 5px solid #f5c76a;
+            border-radius: 14px;
+            padding: 22px 24px;
+            margin-bottom: 20px;
+            min-height: 100px;
+            font-size: 1.02rem;
+            line-height: 1.9;
+            color: #eae6f0;
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+
+        #choices-area {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .choice-btn {
+            background: #252b48;
+            border: 1.5px solid #4a5480;
+            border-radius: 12px;
+            padding: 13px 16px;
+            font-size: 0.98rem;
+            color: #eae6f0;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            text-align: left;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-family: var(--font-serif);
+        }
+        .choice-btn:hover {
+            background: #313a5c;
+            border-color: #f5c76a;
+            transform: translateX(6px);
+        }
+        .choice-badge {
+            background: rgba(245, 199, 106, 0.18);
+            color: #f5c76a;
+            font-weight: bold;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            font-size: 0.85rem;
+        }
+
+        #consequence-panel {
+            background: rgba(0,0,0,0.5);
+            border-left: 4px solid #ff7b7b;
+            border-radius: 12px;
+            padding: 15px 18px;
+            margin-bottom: 18px;
+            font-size: 0.92rem;
+            color: #ffd9d9;
+            line-height: 1.7;
+        }
+
+        #next-btn, #restart-btn {
+            background: #f5c76a;
+            color: #171b28;
+            border: none;
+            border-radius: 40px;
+            padding: 12px 26px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            letter-spacing: 1.5px;
+            font-family: var(--font-serif);
+            transition: 0.25s;
+            display: inline-block;
+            margin: 6px auto 0;
+        }
+        #next-btn:hover, #restart-btn:hover {
+            background: #ffe190;
+            transform: translateY(-3px);
+        }
+
+        #ending-screen {
+            text-align: center;
+            padding: 20px 10px;
+        }
+        #ending-emoji { font-size: 4rem; margin-bottom: 10px; }
+        #ending-title {
+            font-size: 2rem;
+            font-weight: bold;
+            margin-bottom: 12px;
+            color: #f5c76a;
+        }
+        #ending-score-text {
+            font-size: 1.1rem;
+            color: #f5c76a;
+            margin-bottom: 15px;
+        }
+        #ending-desc {
+            font-size: 1rem;
+            line-height: 2;
+            color: #b0a8c0;
+            max-width: 650px;
+            margin: 0 auto 20px;
+            text-align: left;
+            white-space: pre-wrap;
+        }
+        .star-rating {
+            font-size: 1.6rem;
+            letter-spacing: 5px;
+            color: #f5c76a;
+            margin-bottom: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div id="game-wrapper">
+        <div id="score-hud">隐藏计分板 · ?</div>
+        <div id="dynamic-content"></div>
+    </div>
+
+    <script>
+        (function() {
+            // ============================================================
+            // ========== 本地图片配置区域 ==========
+            // ============================================================
+            // 将您的图片文件放在与此HTML文件相同的文件夹中
+            // 然后修改下面的文件名为您的实际文件名
+            // 例如：如果图片叫 "1.jpg"，就写 '1.jpg'
+            // 如果图片在子文件夹 "images" 中，就写 'images/1.jpg'
+            // ============================================================
+            const imageUrls = {
+                // 序章
+                intro: '0/1.jpg',
+                // 场景1-15
+                scene1: '0/2.jpg',
+                scene2: '0/3.jpg',
+                scene3: '0/4.jpg',
+                scene4: '0/5.jpg',
+                scene5: '0/6.jpg',
+                scene6: '0/7.jpg',
+                scene7: '0/8.jpg',
+                scene8: '0/9.jpg',
+                scene9: '0/10.jpg',
+                scene10: '0/11.jpg',
+                scene11: '0/12.jpg',
+                scene12: '0/13.jpg',
+                scene13: '0/14.jpg',
+                scene14: '0/15.jpg',
+                scene15: '0/16.jpg',
+                // 结局1-7
+                ending1: '0/17.jpg',
+                ending2: '0/18.jpg',
+                ending3: '0/19.jpg',
+                ending4: '0/20.jpg',
+                ending5: '0/21.jpg',
+                ending6: '0/22.jpg',
+                ending7: '0/23.jpg',
+            };
+            // ============================================================
+            // ========== 图片配置结束 ==========
+            // ============================================================
+
+            // ========== 游戏数据 ==========
+            const gameData = {
+                intro: {
+                    title: "序 · 交大军训时光",
+                    imgKey: 'intro',
+                    text: "【序章·女性视角】\n\n九月，上海的风还带着梧桐叶的清香。\n\n我，林小满，拖着一个半人高的行李箱，站在上海交通大学的校门前。\n\n阳光穿过树叶的缝隙，落在我的迷彩服肩章上，像碎了一地的金黄。\n\n这是我人生中第一次离家那么远，也是第一次参加军训。\n\n宿舍里，室友们正在互相帮忙整理衣领，镜子里映出四张青涩又充满期待的脸。\n\n\"小满，你的腰带系反啦！\"\n\"啊？真的吗？\"\n\n我手忙脚乱地调整着，心里却涌起一股奇妙的兴奋。\n\n十四天的军训，会遇见怎样的人，发生怎样的故事呢？\n\n我轻轻呼出一口气，推开了宿舍的门。\n\n属于我的交大军训物语，正式开始了。"
+                },
+                scenes: [
+                    { id: 'scene1', imgKey: 'scene1', title: '场景一 · 开学典礼',
+                        text: "【场景一】\n\n开学典礼在体育馆举行。\n\n看台上坐满了穿着绿色迷彩的新生。\n\n我坐在靠边的位置，旁边是一个扎着利落马尾的女孩。\n\n忽然，她转过头，认真地看着我：\n\n\"同学，军训也是大学的一部分，你有没有信心大干一番事业？\"\n\n我张了张嘴，心跳忽然加快了半拍——",
+                        choices: [
+                            { text: "说实话", score: 1, consequence: "你坦诚地说：\"其实我有点紧张，但我会认真对待每一天。\"她笑了，你们交换了名字，后来她成了你军训期间最要好的\"战友\"。+1分" },
+                            { text: "敷衍过去", score: 0, consequence: "你挤出一个礼貌的笑：\"嗯嗯，有的。\"然后迅速把目光移向台上。她的笑容僵了一下，你们之间多了一丝尴尬。" }
+                        ] },
+                    { id: 'scene2', imgKey: 'scene2', title: '场景二 · 午餐时光',
+                        text: "【场景二】\n\n中午的食堂像一锅煮沸的水。\n\n我端着餐盘，终于在一个角落找到位置。\n\n番茄炒蛋、红烧肉、炒青菜，简单却热气腾腾。\n\n我夹起一块红烧肉，在心里默默地问自己——\n\n在这段新旅程里，我想成为一个怎样的人？",
+                        choices: [
+                            { text: "念旧的人", score: 1, consequence: "你想起高中那群朋友，心里涌起温柔的眷恋。你决定带着这些回忆继续认真地生活。+1分" },
+                            { text: "盼新的人", score: 2, consequence: "你告诉自己，未来更值得奔赴。你抬头环视食堂，嘴角不自觉上扬。这份热忱为你加了两分。" },
+                            { text: "孤独的人", score: 0, consequence: "你觉得自己和周围的热闹格格不入，像一座沉默的孤岛。你低头安静地吃饭。" }
+                        ] },
+                    { id: 'scene3', imgKey: 'scene3', title: '场景三 · 宿舍夜静',
+                        text: "【场景三】\n\n晚上十点，宿舍里安静下来。\n\n手机突然震动，是高中同学发来的消息：\n\n\"小满！来开黑！五缺一！\"\n\n我握着手机，手指在键盘上犹豫。\n\n窗外有风吹过，我轻轻叹了口气——",
+                        choices: [
+                            { text: "呼呼大睡", score: 1, consequence: "你关掉手机，倒头就睡。第二天醒来精神饱满，训练时状态极佳。+1分" },
+                            { text: "激情开黑", score: 0, consequence: "你回复：\"来了！\"然后打开电脑。你的声音在安静的宿舍里显得格外突兀，引来了室友的不满……" }
+                        ] },
+                    { id: 'extra1', imgKey: null, title: '额外场景 · 宿舍小风波',
+                        text: "【额外场景】\n\n你正在和队友激烈团战。\n\n忽然，手机屏幕亮起，是室友发来的：\n\n\"能小声点吗？我要睡了。\"\n\n该怎么回应？",
+                        choices: [
+                            { text: "不为所动", score: 0, consequence: "你假装没看到消息，继续打游戏。你和室友之间的关系出现了一丝裂痕。" },
+                            { text: "激情回击", score: 2, consequence: "你暂停游戏，回复：\"抱歉抱歉，我不打了。\"一次坦诚的沟通让宿舍关系反而更亲密了。+2分" }
+                        ] },
+                    { id: 'scene4', imgKey: 'scene4', title: '场景四 · 清晨慌张',
+                        text: "【场景四】\n\n闹钟响了，我迷迷糊糊按掉，再一睁眼——晚了十五分钟！\n\n我手忙脚乱地套迷彩服。\n\n时间真的不够了。\n\n你冲出宿舍楼，楼下停着一排共享单车。\n\n你站在路口，迅速做出决定——",
+                        choices: [
+                            { text: "从容不迫", score: 1, consequence: "你放慢动作，仔细整理，还去食堂买了早餐。到操场时时间刚好。+1分" },
+                            { text: "来不及了！", score: 0, consequence: "你抓起外套就冲出门，到操场时衣领翻着，狼狈极了。" },
+                            { text: "骑车", score: 1, consequence: "你扫开单车，三分钟就到了操场。准时到达。+1分" },
+                            { text: "步行", score: 0, consequence: "你决定步行，到操场时气喘吁吁，狼狈极了。" }
+                        ] },
+                    { id: 'scene5', imgKey: 'scene5', title: '场景五 · 转体训练',
+                        text: "【场景五】\n\n早上的阳光已经很晒了。\n\n教官的口令干脆利落。\n\n该怎么做才能把动作做标准？",
+                        choices: [
+                            { text: "聆听教官指示", score: 1, consequence: "你全神贯注听口令，动作越来越标准。教官微微点头。+1分" },
+                            { text: "跟周围人脚步", score: 0, consequence: "你跟着旁边同学的动作，反而被带乱了，差点撞上旁边的人。" }
+                        ] },
+                    { id: 'scene6', imgKey: 'scene6', title: '场景六 · 匍匐训练',
+                        text: "【场景六】\n\n匍匐前进训练。\n\n地面是粗糙的水泥地。\n\n轮到我了，我犹豫了一下——\n\n穿外套很闷；不穿的话，手臂肯定会被磨得厉害。",
+                        choices: [
+                            { text: "穿外衣", score: 1, consequence: "你穿上外套，手臂只是有些发红，没有破皮。+1分" },
+                            { text: "凉爽点", score: 0, consequence: "你只穿短袖，手臂磨破了好几处，渗出血珠。" }
+                        ] },
+                    { id: 'scene7', imgKey: 'scene7', title: '场景七 · 射击打靶',
+                        text: "【场景七】\n\n射击打靶训练。\n\n我透过瞄准镜，白色的靶心在视野里轻轻晃动。\n\n我深吸一口气——",
+                        choices: [
+                            { text: "瞄住中心", score: 0, consequence: "你认真瞄准，但扣扳机时手抖了，子弹偏离靶心。" },
+                            { text: "手有点抖", score: 1, consequence: "你顺着呼吸节奏扣下扳机，子弹竟然打在了靶心附近！+1分" }
+                        ] },
+                    { id: 'scene8', imgKey: 'scene8', title: '场景八 · 拉练路线',
+                        text: "【场景八】\n\n今晚是拉练夜。\n\n学校给出三条路线：0公里、15公里、20公里。\n\n教官说：\"量力而行。\"\n\n我低下头，在报名表上写下了选择——",
+                        choices: [
+                            { text: "0km", score: 0, consequence: "你选择留在宿舍。听室友说起路上的星空，你心里有些空落落的。" },
+                            { text: "15km（量力而行也很重要）", score: 1, consequence: "你选择了15公里。夜风吹在脸上，心里很满足。+1分" },
+                            { text: "20km", score: 1, consequence: "你选择了20公里。看到终点灯光时，强烈的成就感涌上心头。+1分" }
+                        ] },
+                    { id: 'scene9', imgKey: 'scene9', title: '场景九 · 洗澡时机',
+                        text: "【场景九】\n\n今天训练量很大，浑身是汗。\n\n我看了看时间——现在是中午一点。\n\n我犹豫着——",
+                        choices: [
+                            { text: "中午洗", score: 1, consequence: "你决定错峰洗澡。中午浴室几乎没人，洗得舒舒服服。+1分" },
+                            { text: "晚上洗", score: 0, consequence: "晚上浴室排起长队，快到你时浴室关门了。你只好带着汗味回宿舍。" }
+                        ] },
+                    { id: 'scene10', imgKey: 'scene10', title: '场景十 · 连务会',
+                        text: "【场景十】\n\n晚上是连务会。\n\n我的眼皮像灌了铅。\n\n可困意像潮水一样涌来。\n\n我该怎么办？",
+                        choices: [
+                            { text: "玩下手机提起精神", score: 0, consequence: "你拿出手机，结果被教官发现，手机被暂时保管了。" },
+                            { text: "啥也不管倒头就睡", score: 1, consequence: "你趴在桌上睡着了。教官心疼你，没说你。+1分" }
+                        ] },
+                    { id: 'scene11', imgKey: 'scene11', title: '场景十一 · 阅读时光',
+                        text: "【场景十一】\n\n书桌上摆着几本书。\n\n该看哪一本呢？",
+                        choices: [
+                            { text: "学生手册", score: 1, consequence: "你认真读了一遍。三天后的突击考试正好考到了。+1分" },
+                            { text: "英语四六级单词", score: 0, consequence: "你背了二十个单词，第二天全忘了。" },
+                            { text: "高等数学", score: 0, consequence: "满页公式像天书，半小时后你放弃了。" }
+                        ] },
+                    { id: 'scene12', imgKey: 'scene12', title: '场景十二 · 真人CS',
+                        text: "【场景十二】\n\n真人CS训练。\n\n忽然，你捕捉到对面掩体后有晃动的人影！\n\n手指扣在扳机上——",
+                        choices: [
+                            { text: "勇敢向前莽莽莽", score: 1, consequence: "你猛地冲出，举枪扫射。刚枪成功！+1分" },
+                            { text: "先后撤看下局势", score: 0, consequence: "你后撤时被树根绊倒，对方一枪\"击毙\"了你。" }
+                        ] },
+                    { id: 'scene13', imgKey: 'scene13', title: '场景十三 · 家人的消息',
+                        text: "【场景十三】\n\n妈妈发来消息：\"小满，军训累不累呀？\"\n\n我看着屏幕，鼻子忽然有些酸。\n\n打字时，我的手指停了几秒——",
+                        choices: [
+                            { text: "有点难受", score: 0, consequence: "你回复：\"妈，其实有点累。\"你有些后悔让她担心了。" },
+                            { text: "过得很好", score: 1, consequence: "你回复：\"妈，我过得很好！\"你觉得自己真的有了勇气。+1分" }
+                        ] },
+                    { id: 'scene14', imgKey: 'scene14', title: '场景十四 · 内务检查',
+                        text: "【场景十四】\n\n出门前，你总觉得忘了点什么。\n\n时间不多了，你只能快速检查一样。\n\n到底该查哪里？",
+                        choices: [
+                            { text: "垃圾桶", score: 0, consequence: "垃圾桶空空如也，早就清理过了。" },
+                            { text: "电线", score: 0, consequence: "电线早就拔掉了，没问题。" },
+                            { text: "毛巾", score: 0, consequence: "毛巾挂得整整齐齐，没问题。" },
+                            { text: "床帘", score: 1, consequence: "你猛地想起床帘忘了拉开！赶紧拉开固定好。+1分" }
+                        ] },
+                    { id: 'scene15', imgKey: 'scene15', title: '场景十五 · 水洒危机',
+                        text: "【场景十五】\n\n水洒在了电脑键盘上！\n\n屏幕闪了几下，然后黑了。\n\n该怎么办？",
+                        choices: [
+                            { text: "自己动手急救", score: 0, consequence: "你折腾半天电脑还是没反应。" },
+                            { text: "带到校外维修", score: 0, consequence: "军训期间不能出校，你在校门口被拦下。" },
+                            { text: "带到校内维修", score: 1, consequence: "校内维修点帮你修好了电脑。+1分" },
+                            { text: "呼叫上门服务", score: 0, consequence: "校外人员进不了学校，你只能作罢。" }
+                        ] }
+                ]
+            };
+
+            const endings = [
+                { min: 18, max: 18, title: "🏆 最强兵王", emoji: "🏆", stars: 5, imgKey: 'ending1', desc: "你是这片军训场上的传奇！\n——原来你真会galgame啊！" },
+                { min: 15, max: 17, title: "⭐ 优秀新兵", emoji: "⭐", stars: 4, imgKey: 'ending2', desc: "你以出色的表现完成了军训。继续带着这份力量迎接大学生活吧！" },
+                { min: 12, max: 14, title: "👍 顺利过关", emoji: "👍", stars: 3, imgKey: 'ending3', desc: "你的军训生活平稳而充实。做得不错，继续加油！" },
+                { min: 9, max: 11, title: "🙂 合格新人", emoji: "🙂", stars: 2, imgKey: 'ending4', desc: "你完成了军训的基本要求。以后的路还长，慢慢来。" },
+                { min: 5, max: 8, title: "🐟 摸鱼达人", emoji: "🐟", stars: 2, imgKey: 'ending5', desc: "鱼需慢慢摸，心急则味散。你以自己独特的节奏在军训中游刃有余。" },
+                { min: 1, max: 4, title: "🌅 路漫修远", emoji: "🌅", stars: 1, imgKey: 'ending6', desc: "路漫漫其修远兮。也许你还没找到自己的节奏，但每一次跌倒都是成长的养分。" },
+                { min: 0, max: 0, title: "🌀 盖世奇才", emoji: "🌀", stars: 0, imgKey: 'ending7', desc: "你是传说中的\"反向锦鲤\"。这份\"独特\"，本身就是一种才华。" }
+            ];
+
+            let state = {
+                score: 0,
+                sceneIndex: 0,
+                extraTriggered: false,
+            };
+
+            const contentEl = document.getElementById('dynamic-content');
+            const scoreHud = document.getElementById('score-hud');
+
+            function updateHud(showScore = false) {
+                scoreHud.textContent = showScore ? `隐藏计分板 · ${state.score}分` : '隐藏计分板 · ?';
+                scoreHud.style.color = showScore ? 'rgba(255,255,255,0.6)' : 'rgba(255,255,255,0.3)';
+            }
+
+            function renderImage(imgKey) {
+                const url = imageUrls[imgKey];
+                if (!url || url.trim() === '') {
+                    return `
+                        <div class="image-container">
+                            <div class="image-fallback">📷 此处可插入图片<br><small>（在代码中 imageUrls 里配置文件路径）</small></div>
+                        </div>
+                    `;
+                }
+                return `
+                    <div class="image-container">
+                        <img src="${url}" alt="${imgKey}" 
+                             onerror="this.parentElement.innerHTML='<div class=&quot;image-fallback&quot;>📷 图片加载失败：' + '${url}' + '<br><small>请检查文件是否存在</small></div>';">
+                    </div>
+                `;
+            }
+
+            function renderIntro() {
+                contentEl.innerHTML = `
+                    <div id="scene-title">${gameData.intro.title}</div>
+                    ${renderImage('intro')}
+                    <div id="narrative-box">${gameData.intro.text}</div>
+                    <div style="text-align:center;">
+                        <button id="next-btn" onclick="startScenes()">开始军训旅程 →</button>
+                    </div>
+                `;
+                updateHud();
+            }
+
+            function renderScene() {
+                const scene = gameData.scenes[state.sceneIndex];
+                if (!scene) { renderEnding(); return; }
+                if (scene.id === 'extra1' && !state.extraTriggered) {
+                    state.sceneIndex++;
+                    renderScene();
+                    return;
+                }
+
+                const imgHtml = scene.imgKey ? renderImage(scene.imgKey) : '';
+                contentEl.innerHTML = `
+                    <div id="scene-title">${scene.title}</div>
+                    ${imgHtml}
+                    <div id="narrative-box">${scene.text}</div>
+                    <div id="choices-area">
+                        ${scene.choices.map((c, i) => `
+                            <button class="choice-btn" onclick="handleChoice(${i})">
+                                <span class="choice-badge">${String.fromCharCode(65 + i)}</span>
+                                ${c.text}
+                            </button>
+                        `).join('')}
+                    </div>
+                `;
+                updateHud();
+            }
+
+            window.handleChoice = function(idx) {
+                const scene = gameData.scenes[state.sceneIndex];
+                const choice = scene.choices[idx];
+                state.score += choice.score;
+
+                if (scene.id === 'scene3' && idx === 1) {
+                    state.extraTriggered = true;
+                    renderConsequence(scene, choice, true);
+                    return;
+                }
+                renderConsequence(scene, choice, false);
+            };
+
+            function renderConsequence(scene, choice, goExtra) {
+                contentEl.innerHTML = `
+                    <div id="scene-title">${scene.title}</div>
+                    <div id="narrative-box">${choice.consequence}</div>
+                    <div id="consequence-panel">💡 <strong>【后果】</strong> ${choice.consequence}</div>
+                    <div style="text-align:center;">
+                        <button id="next-btn" onclick="advance(${goExtra})">继续 →</button>
+                    </div>
+                `;
+                updateHud();
+            }
+
+            window.advance = function(goExtra) {
+                if (goExtra) {
+                    state.sceneIndex = gameData.scenes.findIndex(s => s.id === 'extra1');
+                } else {
+                    state.sceneIndex++;
+                }
+                if (state.sceneIndex >= gameData.scenes.length) {
+                    renderEnding();
+                } else {
+                    renderScene();
+                }
+            };
+
+            function renderEnding() {
+                const ending = endings.find(e => state.score >= e.min && state.score <= e.max);
+                const stars = '★'.repeat(ending.stars) + '☆'.repeat(5 - ending.stars);
+                contentEl.innerHTML = `
+                    <div id="ending-screen">
+                        <div id="ending-emoji">${ending.emoji}</div>
+                        <div id="ending-title">${ending.title}</div>
+                        <div class="star-rating">${stars}</div>
+                        <div id="ending-score-text">最终得分：${state.score} 分</div>
+                        ${renderImage(ending.imgKey)}
+                        <div id="ending-desc">${ending.desc}</div>
+                        <div style="margin-top:15px;font-size:0.85rem;color:rgba(255,255,255,0.4);">🎮 本游戏共有7个结局</div>
+                        <button id="restart-btn" onclick="restartGame()">🔄 重新开始</button>
+                    </div>
+                `;
+                updateHud(true);
+            }
+
+            window.startScenes = function() {
+                state.sceneIndex = 0;
+                state.extraTriggered = false;
+                state.score = 0;
+                renderScene();
+            };
+
+            window.restartGame = function() {
+                state = { score: 0, sceneIndex: 0, extraTriggered: false };
+                renderIntro();
+            };
+
+            // 启动游戏
+            renderIntro();
+        })();
+    </script>
+</body>
+</html>
